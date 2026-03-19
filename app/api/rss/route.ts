@@ -31,10 +31,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "sources parameter is required" }, { status: 400 });
   }
 
-  // Format: "id:name:encodedUrl,id:name:encodedUrl,..."
+  // Format: "id:name:url,id:name:url,..." (searchParams already decoded)
   const entries = sourcesParam.split(",").map((entry) => {
-    const [id, name, encodedUrl] = entry.split(":");
-    return { id, name: decodeURIComponent(name ?? ""), url: decodeURIComponent(encodedUrl ?? "") };
+    const [id, name, ...urlParts] = entry.split(":");
+    return { id, name: name ?? "", url: urlParts.join(":") };
   });
 
   const results = await Promise.all(
