@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { WsbTicker, RedditPost } from "@/lib/types";
 
-const APE_WISDOM_URL = "https://apewisdom.io/api/v1.0/filter/all-reddit/page/1";
+const APE_WISDOM_URL = "https://apewisdom.io/api/v1.0/filter/wallstreetbets/page/1";
 const REDDIT_INVESTING_URL = "https://www.reddit.com/r/investing/new.json?limit=10";
 
 async function fetchWsbTop(): Promise<WsbTicker[]> {
