@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { RssSource, BookmarkEntry } from "./types";
 
-const STORAGE_KEY = "rss-dashboard-v1";
+export const STORAGE_KEY = "rss-dashboard-v1";
 
 // Versioned localStorage storage with try-catch (client-localstorage-schema rule)
 const safeStorage = createJSONStorage(() => ({
@@ -56,6 +56,7 @@ interface DashboardState {
   toggleBookmark: (articleId: string) => void;
   setMemo: (articleId: string, memo: string) => void;
   setLastUpdatedAt: (ts: number) => void;
+  reset: () => void;
 }
 
 export const useDashboardStore = create<DashboardState>()(
@@ -109,6 +110,15 @@ export const useDashboardStore = create<DashboardState>()(
         })),
 
       setLastUpdatedAt: (ts) => set({ lastUpdatedAt: ts }),
+
+      reset: () =>
+        set({
+          sources: DEFAULT_SOURCES,
+          bookmarks: {},
+          activeTab: "All",
+          searchQuery: "",
+          lastUpdatedAt: null,
+        }),
     }),
     {
       name: STORAGE_KEY,
