@@ -1,9 +1,8 @@
 "use client";
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, TrendingUp, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import type { RedditData } from "@/lib/types";
 
 interface RedditPanelProps {
@@ -15,8 +14,8 @@ interface RedditPanelProps {
 export function RedditPanel({ data, error, onRetry }: RedditPanelProps) {
   if (error) {
     return (
-      <div className="mt-8 space-y-3">
-        <h2 className="text-sm font-semibold">Reddit 커뮤니티</h2>
+      <div className="space-y-3">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Reddit 커뮤니티</h2>
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>Reddit 데이터를 불러올 수 없습니다</AlertDescription>
@@ -33,37 +32,41 @@ export function RedditPanel({ data, error, onRetry }: RedditPanelProps) {
   }
 
   return (
-    <div className="mt-8 grid gap-6 md:grid-cols-2">
+    <div className="space-y-5">
       {/* WSB Top Tickers */}
       <section>
-        <h2 className="text-sm font-semibold mb-3">WSB Top 종목</h2>
-        <ul className="space-y-1.5">
+        <div className="flex items-center gap-1.5 mb-3">
+          <TrendingUp className="h-3.5 w-3.5 text-primary" />
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">WSB Top 종목</h2>
+        </div>
+        <ul className="space-y-1">
           {data.wsb.map((item) => (
-            <li key={item.ticker} className="text-sm">
+            <li key={item.ticker} className="py-1 text-sm border-b border-border/40 last:border-0">
               {item.rank}. {item.ticker} {item.mentions}회
             </li>
           ))}
         </ul>
       </section>
 
-      <Separator className="md:hidden" />
-
       {/* r/investing posts */}
       <section>
-        <h2 className="text-sm font-semibold mb-3">r/investing 최신 게시글</h2>
-        <ul className="space-y-2">
+        <div className="flex items-center gap-1.5 mb-3">
+          <MessageSquare className="h-3.5 w-3.5 text-primary" />
+          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">r/investing</h2>
+        </div>
+        <ul className="space-y-3">
           {data.investing.map((post) => (
             <li key={post.url}>
               <a
                 href={post.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm hover:underline leading-snug block"
+                className="text-xs font-medium hover:text-primary transition-colors leading-snug block line-clamp-2"
               >
                 {post.title}
               </a>
-              <span className="text-xs text-muted-foreground">
-                {post.score}점 · 댓글 {post.numComments}
+              <span className="text-xs text-muted-foreground mt-0.5 block">
+                ▲ {post.score} · 댓글 {post.numComments}
               </span>
             </li>
           ))}

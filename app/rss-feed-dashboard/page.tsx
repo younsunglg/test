@@ -6,8 +6,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Search } from "lucide-react";
-import { useDashboardStore, STORAGE_KEY, DEFAULT_SOURCES } from "@/lib/store";
+import { RefreshCw, Search, TrendingUp } from "lucide-react";
+import { useDashboardStore, STORAGE_KEY } from "@/lib/store";
 import Fuse from "fuse.js";
 import type { NewsItem, RedditData } from "@/lib/types";
 import { NewsCard } from "@/components/news-card";
@@ -24,7 +24,6 @@ function formatLastUpdated(ts: number): string {
 }
 
 export default function RssFeedDashboardPage() {
-  // Synchronous store reset when localStorage was cleared between tests (client-localstorage-schema rule)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_init] = useState(() => {
     if (typeof window !== "undefined" && !localStorage.getItem(STORAGE_KEY)) {
@@ -36,31 +35,23 @@ export default function RssFeedDashboardPage() {
   const sources = useDashboardStore((s) => s.sources);
   const bookmarks = useDashboardStore((s) => s.bookmarks);
 
-  // Local transient state — resets on each component mount
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
 
-  // SWR: news feed (client-swr-dedup rule)
   const newsKey = `/api/rss?sources=${sources.map((s) => `${s.id}:${encodeURIComponent(s.name)}:${encodeURIComponent(s.url)}`).join(",")}`;
-  const { data: newsItems, isLoading, mutate: refreshNews } = useSWR<NewsItem[]>(
-    newsKey,
-    fetcher,
-  );
+  const { data: newsItems, isLoading, mutate: refreshNews } = useSWR<NewsItem[]>(newsKey, fetcher);
 
-  // SWR: Reddit community data
   const {
     data: redditData,
     error: redditError,
     mutate: refreshReddit,
   } = useSWR<RedditData>("/api/reddit", fetcher);
 
-  // Track last update time (rendering-conditional-render rule: use ternary for null check)
   useEffect(() => {
     if (newsItems) setLastUpdatedAt(Date.now());
   }, [newsItems]);
 
-  // --- Derived filtering (rerender-derived-state rule) ---
   const allItems = Array.isArray(newsItems) ? newsItems : [];
 
   const tabFiltered =
@@ -70,13 +61,11 @@ export default function RssFeedDashboardPage() {
         ? allItems.filter((item) => Boolean(bookmarks[item.id]))
         : allItems.filter((item) => item.sourceId === activeTab);
 
-  // fuse.js fuzzy search on title
   const fuse = new Fuse(tabFiltered, { keys: ["title"], threshold: 0.4 });
   const filteredItems = searchQuery.trim()
     ? fuse.search(searchQuery).map((r) => r.item)
     : tabFiltered;
 
-  // Sort by publishedAt descending (js-tosorted-immutable rule)
   const sortedItems = filteredItems
     .slice()
     .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
@@ -87,72 +76,108 @@ export default function RssFeedDashboardPage() {
   };
 
   return (
-    <main className="max-w-6xl mx-auto p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-lg font-bold">투자 리서치 대시보드</h1>
-          {lastUpdatedAt !== null ? (
-            <p className="text-xs text-muted-foreground">{formatLastUpdated(lastUpdatedAt)}</p>
-          ) : null}
+    <div className="min-h-screen bg-muted/30">
+      {/* Top Header */}
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur border-b">
+        <div className="max-w-screen-xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
+            <span className="font-bold text-base tracking-tight">투자 리서치</span>
+            {lastUpdatedAt !== null ? (
+              <span className="text-xs text-muted-foreground hidden sm:inline">
+                · {formatLastUpdated(lastUpdatedAt)}
+              </span>
+            ) : null}
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleRefresh} aria-label="새로고침">
+            <RefreshCw className="h-4 w-4" />
+            <span className="hidden sm:inline ml-1.5">새로고침</span>
+          </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh} aria-label="새로고침">
-          <RefreshCw data-icon="inline-start" />
-          새로고침
-        </Button>
-      </div>
+      </header>
 
-      {/* Source Add Form */}
-      <SourceAddForm />
+      <div className="max-w-screen-xl mx-auto px-6 py-6">
+        <div className="flex gap-6 items-start">
 
-      {/* Tabs + Search */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex items-center gap-3 flex-wrap">
-          <TabsList>
-            <TabsTrigger value="All">All</TabsTrigger>
-            {sources.map((source) => (
-              <TabsTrigger key={source.id} value={source.id}>
-                {source.name}
-              </TabsTrigger>
-            ))}
-            <TabsTrigger value="북마크">북마크</TabsTrigger>
-          </TabsList>
+          {/* ── Left: News Feed ── */}
+          <div className="flex-1 min-w-0">
+            {/* Tabs + Search */}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <div className="flex items-center gap-3 flex-wrap mb-4">
+                <TabsList className="h-9">
+                  <TabsTrigger value="All" className="text-xs px-3">All</TabsTrigger>
+                  {sources.map((source) => (
+                    <TabsTrigger key={source.id} value={source.id} className="text-xs px-3">
+                      {source.name}
+                    </TabsTrigger>
+                  ))}
+                  <TabsTrigger value="북마크" className="text-xs px-3">북마크</TabsTrigger>
+                </TabsList>
 
-          <div className="flex items-center border rounded-md px-3 py-1 gap-2 ml-auto">
-            <Search className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-            <Input
-              className="border-0 p-0 h-auto focus-visible:ring-0 shadow-none w-36"
-              placeholder="키워드 검색..."
-              value={searchQuery}
-              onChange={(e) => startTransition(() => setSearchQuery(e.target.value))}
-            />
+                <div className="flex items-center border bg-background rounded-lg px-3 py-1.5 gap-2 ml-auto shadow-sm">
+                  <Search className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                  <Input
+                    className="border-0 p-0 h-auto focus-visible:ring-0 shadow-none w-36 text-sm"
+                    placeholder="키워드 검색..."
+                    value={searchQuery}
+                    onChange={(e) => startTransition(() => setSearchQuery(e.target.value))}
+                  />
+                </div>
+              </div>
+            </Tabs>
+
+            {/* Scrollable News Area */}
+            <div className="h-[calc(100vh-180px)] overflow-y-auto pr-1">
+              {isLoading ? (
+                <div role="status" className="grid gap-3 sm:grid-cols-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-36 w-full rounded-xl" />
+                  ))}
+                </div>
+              ) : searchQuery.trim() !== "" && sortedItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                  <Search className="h-8 w-8 mb-2 opacity-30" />
+                  <p className="text-sm">검색 결과가 없습니다</p>
+                </div>
+              ) : sortedItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                  <TrendingUp className="h-8 w-8 mb-2 opacity-30" />
+                  <p className="text-sm">표시할 기사가 없습니다</p>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {sortedItems.map((item) => (
+                    <NewsCard
+                      key={item.id}
+                      item={item}
+                      showSourceBadge={activeTab === item.sourceId}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* ── Right Sidebar ── */}
+          <aside className="w-72 shrink-0 hidden lg:block">
+            <div className="sticky top-20 space-y-4 h-[calc(100vh-100px)] overflow-y-auto pb-4">
+              {/* Source Add */}
+              <div className="bg-background rounded-xl border p-4 shadow-sm">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  RSS 소스
+                </p>
+                <SourceAddForm />
+              </div>
+
+              {/* Reddit Panel */}
+              <div className="bg-background rounded-xl border p-4 shadow-sm">
+                <RedditPanel data={redditData} error={redditError} onRetry={refreshReddit} />
+              </div>
+            </div>
+          </aside>
+
         </div>
-      </Tabs>
-
-      {/* News Feed */}
-      <div className="mt-4">
-        {isLoading ? (
-          <div role="status" className="grid gap-3 md:grid-cols-2">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-32 w-full" />
-            ))}
-          </div>
-        ) : searchQuery.trim() !== "" && sortedItems.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">검색 결과가 없습니다</p>
-        ) : sortedItems.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">표시할 기사가 없습니다</p>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {sortedItems.map((item) => (
-              <NewsCard key={item.id} item={item} showSourceBadge={activeTab === item.sourceId} />
-            ))}
-          </div>
-        )}
       </div>
-
-      {/* Reddit Panel */}
-      <RedditPanel data={redditData} error={redditError} onRetry={refreshReddit} />
-    </main>
+    </div>
   );
 }

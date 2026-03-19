@@ -1,15 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Rss } from "lucide-react";
+import { Rss, Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useDashboardStore } from "@/lib/store";
 import { nanoid } from "nanoid";
 import type { RssSource } from "@/lib/types";
 
-// Hoisted at module level (js-hoist-regexp rule)
 function extractSourceName(url: string): string {
   const hostname = new URL(url).hostname;
   const parts = hostname.split(".");
@@ -22,6 +20,7 @@ function extractSourceName(url: string): string {
 export function SourceAddForm() {
   const sources = useDashboardStore((s) => s.sources);
   const addSource = useDashboardStore((s) => s.addSource);
+  const removeSource = useDashboardStore((s) => s.removeSource);
 
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +33,6 @@ export function SourceAddForm() {
       return;
     }
 
-    // Validate URL format using URL constructor (no regex needed for this)
     let parsed: URL;
     try {
       parsed = new URL(trimmed);
@@ -46,7 +44,6 @@ export function SourceAddForm() {
       return;
     }
 
-    // O(1) URL duplicate check using Set (js-set-map-lookups rule)
     const sourceUrlSet = new Set(sources.map((s) => s.url));
     if (sourceUrlSet.has(trimmed)) {
       setError("이미 등록된 소스입니다");
@@ -67,12 +64,13 @@ export function SourceAddForm() {
   };
 
   return (
-    <div className="mb-4 space-y-2">
+    <div className="space-y-3">
+      {/* Input row */}
       <div className="flex gap-2">
-        <div className="flex-1 flex items-center border rounded-md px-3 py-1.5 gap-2">
-          <Rss className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1 flex items-center bg-muted/50 border rounded-lg px-3 py-2 gap-2 focus-within:ring-2 focus-within:ring-ring/30 transition-shadow">
+          <Rss className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
           <Input
-            className="border-0 p-0 h-auto focus-visible:ring-0 shadow-none"
+            className="border-0 p-0 h-auto focus-visible:ring-0 shadow-none bg-transparent text-sm"
             placeholder="RSS URL 입력 (https://...)"
             value={url}
             onChange={(e) => {
@@ -84,14 +82,37 @@ export function SourceAddForm() {
             }}
           />
         </div>
-        <Button variant="outline" onClick={handleAdd}>
-          + 소스 추가
+        <Button size="sm" onClick={handleAdd} className="shrink-0">
+          <Plus className="h-3.5 w-3.5" />
+          <span>+ 소스 추가</span>
         </Button>
       </div>
+
       {error !== null ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <p className="text-xs text-destructive px-1">{error}</p>
+      ) : null}
+
+      {/* Source list */}
+      {sources.length > 0 ? (
+        <ul className="space-y-1">
+          {sources.map((source) => (
+            <li key={source.id} className="flex items-center justify-between text-xs py-1 px-2 rounded-lg hover:bg-muted/50 group">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                <span className="font-medium truncate">· {source.name}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => removeSource(source.id)}
+                aria-label={`${source.name} 삭제`}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </div>
   );

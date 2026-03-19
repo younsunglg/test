@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bookmark, BookmarkCheck, FileText } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Bookmark, BookmarkCheck, FileText, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +17,12 @@ import { useDashboardStore, selectIsBookmarked, selectMemo } from "@/lib/store";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { NewsItem, Sentiment } from "@/lib/types";
+
+const SENTIMENT_COLOR: Record<Sentiment, string> = {
+  Bullish: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  Bearish: "bg-rose-100 text-rose-700 border-rose-200",
+  Neutral: "bg-gray-100 text-gray-600 border-gray-200",
+};
 
 const SENTIMENT_VARIANT: Record<Sentiment, "default" | "destructive" | "secondary"> = {
   Bullish: "default",
@@ -52,65 +57,74 @@ export function NewsCard({ item, showSourceBadge = false }: NewsCardProps) {
   return (
     <>
       <article>
-        <Card className="h-full">
-          <CardContent className="p-4 flex flex-col gap-2">
-            {/* Source + Sentiment badges */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {showSourceBadge ? (
-                <Badge variant="outline">{item.sourceName}</Badge>
-              ) : null}
-              {item.sentiment ? (
-                <Badge variant={SENTIMENT_VARIANT[item.sentiment]}>{item.sentiment}</Badge>
-              ) : null}
+        <div className="group bg-background rounded-xl border shadow-sm hover:shadow-md transition-shadow duration-200 h-full flex flex-col p-4 gap-3">
+          {/* Badges row */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {showSourceBadge ? (
+              <Badge variant="outline" className="text-xs font-medium">
+                {item.sourceName}
+              </Badge>
+            ) : null}
+            {item.sentiment ? (
+              <Badge variant={SENTIMENT_VARIANT[item.sentiment]} className={SENTIMENT_COLOR[item.sentiment]}>
+                {item.sentiment}
+              </Badge>
+            ) : null}
+          </div>
+
+          {/* Title */}
+          <a
+            href={item.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold leading-snug hover:text-primary transition-colors line-clamp-3 flex-1"
+          >
+            {item.title}
+            <ExternalLink className="inline h-3 w-3 ml-1 opacity-0 group-hover:opacity-40 transition-opacity" />
+          </a>
+
+          {/* Memo preview */}
+          {memo ? (
+            <p className="text-xs text-muted-foreground italic bg-muted/50 rounded px-2 py-1">
+              {memo}
+            </p>
+          ) : null}
+
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-1 border-t border-border/50">
+            <span className="text-xs text-muted-foreground">
+              {item.sourceName} · {formatDistanceToNow(new Date(item.publishedAt), {
+                addSuffix: true,
+                locale: ko,
+              })}
+            </span>
+            <div className="flex gap-0.5 -mr-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                aria-label="북마크"
+                data-bookmarked={isBookmarked ? "true" : "false"}
+                onClick={() => toggleBookmark(item.id)}
+              >
+                {isBookmarked ? (
+                  <BookmarkCheck className="h-3.5 w-3.5 text-primary" data-icon="inline-start" />
+                ) : (
+                  <Bookmark className="h-3.5 w-3.5" data-icon="inline-start" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                aria-label="메모"
+                onClick={handleMemoOpen}
+              >
+                <FileText className="h-3.5 w-3.5" data-icon="inline-start" />
+              </Button>
             </div>
-
-            {/* Title */}
-            <a
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium leading-snug hover:underline line-clamp-2"
-            >
-              {item.title}
-            </a>
-
-            {/* Memo preview */}
-            {memo ? <p className="text-xs text-muted-foreground italic">{memo}</p> : null}
-
-            {/* Footer: published time + actions */}
-            <div className="flex items-center justify-between mt-auto">
-              <span className="text-xs text-muted-foreground">
-                {item.sourceName} · {formatDistanceToNow(new Date(item.publishedAt), {
-                  addSuffix: true,
-                  locale: ko,
-                })}
-              </span>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label="북마크"
-                  data-bookmarked={isBookmarked ? "true" : "false"}
-                  onClick={() => toggleBookmark(item.id)}
-                >
-                  {isBookmarked ? (
-                    <BookmarkCheck data-icon="inline-start" />
-                  ) : (
-                    <Bookmark data-icon="inline-start" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-label="메모"
-                  onClick={handleMemoOpen}
-                >
-                  <FileText data-icon="inline-start" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </article>
 
       <Dialog open={memoOpen} onOpenChange={setMemoOpen}>
