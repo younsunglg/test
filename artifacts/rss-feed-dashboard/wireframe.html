@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: RSS Feed Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+  * { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; color: var(--w-text); }
+  body { background: var(--w-bg); }
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .vp-toggle button { font-size: 12px; padding: 2px 8px; border: 1px solid var(--w-border); cursor: pointer; background: white; }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important; margin: 24px auto !important;
+    border: 2px solid var(--w-border); border-radius: 24px; min-height: 667px;
+    background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.08); padding: 32px 16px !important;
+  }
+  .screen-notes { background: #fffde7; border-left: 3px solid #ffd54f; padding: 12px 16px; margin-bottom: 24px; font-size: 13px; border-radius: 0 4px 4px 0; }
+  .screen-notes summary { cursor: pointer; font-weight: bold; font-size: 12px; color: #b0a050; text-transform: uppercase; letter-spacing: 0.05em; }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+</style>
+</head>
+<body class="p-0 m-0 viewport-desktop">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">① 기본 화면</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">② 로딩 & 소스 추가</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">③ 탭 필터 & 검색</button>
+  <button id="nav-3" onclick="show(3)" class="px-2 py-1">④ 북마크 & 메모</button>
+  <button id="nav-4" onclick="show(4)" class="px-2 py-1">⑤ 새로고침 & Reddit 오류</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')" class="active">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')">Mobile</button>
+  </div>
+</nav>
+
+<!-- ① 기본 화면 -->
+<div id="screen-0" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">① 기본 화면 — 평상시 대시보드</h2>
+
+    <!-- App Header -->
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-base font-bold">투자 리서치 대시보드</h1>
+        <p class="text-xs" style="color:var(--w-muted)">방금 전 업데이트</p>
+      </div>
+      <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+        <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>
+        새로고침
+      </button>
+    </div>
+
+    <!-- Source Add -->
+    <div class="flex gap-2 mb-4">
+      <div class="flex-1 flex items-center border rounded px-3 py-1.5 gap-2" style="border-color:var(--w-border); background:var(--w-fill);">
+        <i data-lucide="rss" style="width:14px;height:14px;flex-shrink:0;"></i>
+        <input class="w-full text-sm border-0 outline-none" style="background:transparent; color:var(--w-muted)" placeholder="RSS URL 입력 (https://...)" disabled>
+      </div>
+      <button class="border rounded px-3 py-1.5 text-sm font-bold" style="border-color:var(--w-text); background:var(--w-fill)" disabled>+ 소스 추가</button>
+    </div>
+
+    <!-- Source Tabs + Search -->
+    <div class="flex items-center gap-3 mb-1 flex-wrap @md:flex-nowrap">
+      <div class="flex gap-0" style="border-bottom:1px solid var(--w-border);">
+        <button class="px-4 py-2 text-sm font-bold" style="border-bottom:2px solid var(--w-text);" disabled>All</button>
+        <button class="px-4 py-2 text-sm" style="color:var(--w-muted);" disabled>Reuters</button>
+        <button class="px-4 py-2 text-sm" style="color:var(--w-muted);" disabled>CNBC</button>
+        <button class="px-4 py-2 text-sm" style="color:var(--w-muted);" disabled>
+          <i data-lucide="bookmark" style="width:13px;height:13px;display:inline;"></i> 북마크
+        </button>
+      </div>
+      <div class="flex-1 flex items-center border rounded px-3 py-1.5 gap-2 @md:ml-auto" style="border-color:var(--w-border); background:var(--w-fill); min-width:180px;">
+        <i data-lucide="search" style="width:14px;height:14px;flex-shrink:0;"></i>
+        <input class="w-full text-sm border-0 outline-none" style="background:transparent; color:var(--w-muted)" placeholder="키워드 검색..." disabled>
+      </div>
+    </div>
+
+    <!-- News Feed -->
+    <div class="grid gap-3 mt-4 @md:grid-cols-2" style="margin-bottom:0;">
+
+      <!-- Card 1 - Bullish -->
+      <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+          <div class="flex items-center gap-1.5">
+            <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🟢 Bullish</span>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="bookmark" style="width:13px;height:13px;"></i>
+            </button>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+        <p class="text-sm font-bold leading-snug mb-1">Fed Signals Potential Rate Cuts in Q2 as Inflation Eases to 2.8%</p>
+        <p class="text-xs" style="color:var(--w-muted)">2시간 전 · AAPL · TSLA · SPY</p>
+      </div>
+
+      <!-- Card 2 - Bearish -->
+      <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">CNBC</span>
+          <div class="flex items-center gap-1.5">
+            <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🔴 Bearish</span>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="bookmark" style="width:13px;height:13px;"></i>
+            </button>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+        <p class="text-sm font-bold leading-snug mb-1">China Manufacturing PMI Drops Below 50, Reigniting Recession Fears</p>
+        <p class="text-xs" style="color:var(--w-muted)">3시간 전 · FXI · EEM</p>
+      </div>
+
+      <!-- Card 3 - Neutral -->
+      <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+          <div class="flex items-center gap-1.5">
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">⚪ Neutral</span>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="bookmark" style="width:13px;height:13px;"></i>
+            </button>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+        <p class="text-sm font-bold leading-snug mb-1">EU Reaches Tentative Agreement on New AI Regulation Framework</p>
+        <p class="text-xs" style="color:var(--w-muted)">4시간 전 · MSFT · GOOGL</p>
+      </div>
+
+      <!-- Card 4 - Bullish + 메모 있음 -->
+      <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">CNBC</span>
+          <div class="flex items-center gap-1.5">
+            <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🟢 Bullish</span>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="bookmark" style="width:13px;height:13px;"></i>
+            </button>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+        <p class="text-sm font-bold leading-snug mb-1">Apple Revenue Beats Estimates: Services Revenue Hits Record $26B</p>
+        <p class="text-xs" style="color:var(--w-muted)">5시간 전 · AAPL</p>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+          <div class="flex items-center gap-1.5">
+            <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🔴 Bearish</span>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="bookmark" style="width:13px;height:13px;"></i>
+            </button>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+        <p class="text-sm font-bold leading-snug mb-1">Oil Prices Slide 3% on Unexpected Build in U.S. Crude Inventories</p>
+        <p class="text-xs" style="color:var(--w-muted)">6시간 전 · XOM · CVX · USO</p>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+        <div class="flex items-center justify-between mb-2">
+          <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">CNBC</span>
+          <div class="flex items-center gap-1.5">
+            <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">⚪ Neutral</span>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="bookmark" style="width:13px;height:13px;"></i>
+            </button>
+            <button class="border rounded p-1" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+              <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            </button>
+          </div>
+        </div>
+        <p class="text-sm font-bold leading-snug mb-1">Treasury Yields Edge Higher Ahead of Key Inflation Data Release</p>
+        <p class="text-xs" style="color:var(--w-muted)">7시간 전 · TLT · IEF</p>
+      </div>
+
+    </div>
+
+    <!-- Reddit Section Divider -->
+    <div style="border-top:2px solid var(--w-border); margin: 24px 0 16px;"></div>
+    <div class="flex items-center gap-2 mb-4">
+      <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+      <h2 class="text-sm font-bold">Reddit 커뮤니티 반응</h2>
+    </div>
+
+    <div class="grid gap-4 @md:grid-cols-2">
+      <!-- WSB Top Stocks -->
+      <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+        <div class="px-4 py-3 text-xs font-bold" style="border-bottom:1px solid var(--w-border); background:var(--w-fill);">
+          r/wallstreetbets — WSB Top 언급 종목
+        </div>
+        <div>
+          <div class="flex items-center justify-between px-4 py-2.5 text-sm" style="border-bottom:1px solid var(--w-border);">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold" style="color:var(--w-muted)">1</span>
+              <span class="font-bold">AAPL</span>
+            </div>
+            <span class="text-xs" style="color:var(--w-muted)">342회 언급</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-2.5 text-sm" style="border-bottom:1px solid var(--w-border);">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold" style="color:var(--w-muted)">2</span>
+              <span class="font-bold">TSLA</span>
+            </div>
+            <span class="text-xs" style="color:var(--w-muted)">298회 언급</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-2.5 text-sm" style="border-bottom:1px solid var(--w-border);">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold" style="color:var(--w-muted)">3</span>
+              <span class="font-bold">NVDA</span>
+            </div>
+            <span class="text-xs" style="color:var(--w-muted)">241회 언급</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-2.5 text-sm" style="border-bottom:1px solid var(--w-border);">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold" style="color:var(--w-muted)">4</span>
+              <span class="font-bold">SPY</span>
+            </div>
+            <span class="text-xs" style="color:var(--w-muted)">189회 언급</span>
+          </div>
+          <div class="flex items-center justify-between px-4 py-2.5 text-sm">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold" style="color:var(--w-muted)">5</span>
+              <span class="font-bold">AMD</span>
+            </div>
+            <span class="text-xs" style="color:var(--w-muted)">156회 언급</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- r/investing latest posts -->
+      <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+        <div class="px-4 py-3 text-xs font-bold" style="border-bottom:1px solid var(--w-border); background:var(--w-fill);">
+          r/investing — 최신 게시글
+        </div>
+        <div>
+          <div class="px-4 py-3 text-sm flex items-start gap-2" style="border-bottom:1px solid var(--w-border);">
+            <i data-lucide="external-link" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+              <p class="leading-snug">With the Fed signaling cuts, is now the time to rotate from growth to value?</p>
+              <p class="text-xs mt-1" style="color:var(--w-muted)">↑ 1.2k · 243 comments</p>
+            </div>
+          </div>
+          <div class="px-4 py-3 text-sm flex items-start gap-2" style="border-bottom:1px solid var(--w-border);">
+            <i data-lucide="external-link" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+              <p class="leading-snug">Daily Discussion: March 19, 2026 — Macro outlook & portfolio moves</p>
+              <p class="text-xs mt-1" style="color:var(--w-muted)">↑ 876 · 512 comments</p>
+            </div>
+          </div>
+          <div class="px-4 py-3 text-sm flex items-start gap-2" style="border-bottom:1px solid var(--w-border);">
+            <i data-lucide="external-link" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+              <p class="leading-snug">Oil inventory build — implications for energy sector ETFs (XLE, VDE)</p>
+              <p class="text-xs mt-1" style="color:var(--w-muted)">↑ 634 · 98 comments</p>
+            </div>
+          </div>
+          <div class="px-4 py-3 text-sm flex items-start gap-2">
+            <i data-lucide="external-link" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+              <p class="leading-snug">Apple earnings beat — what's the bull case going forward?</p>
+              <p class="text-xs mt-1" style="color:var(--w-muted)">↑ 445 · 77 comments</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>대표 데이터가 채워진 평상시 대시보드. All 탭 활성, 6개 기사 카드(Bullish/Bearish/Neutral 혼합), 하단 Reddit 섹션.</p>
+        <ul>
+          <li>앱 헤더: 제목 + 마지막 업데이트 시각 + 새로고침 버튼</li>
+          <li>소스 추가: RSS URL 입력 + 추가 버튼 (상단 고정)</li>
+          <li>탭: All(활성) · Reuters · CNBC · 북마크 / 우측 키워드 검색창</li>
+          <li>뉴스 카드: [소스 배지] [Sentiment 배지] [북마크 아이콘] [메모 아이콘] / 제목 / 발행시각·티커</li>
+          <li>Reddit 섹션: WSB Top 5 종목(순위·티커·언급수) + r/investing 최신글 4개(제목·업보트·댓수·외부링크)</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ② 로딩 & 소스 추가 -->
+<div id="screen-1" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">② 로딩 & 소스 추가 — RSSDASH-014, 002, 003, 004, 015</h2>
+
+    <div class="grid gap-6 @md:grid-cols-2">
+
+      <!-- 2-A: 초기 로딩 상태 (RSSDASH-014) -->
+      <div>
+        <p class="text-xs font-bold mb-3" style="color:var(--w-muted)">RSSDASH-014 — 초기 피드 로딩 중</p>
+        <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+          <!-- Header skeleton -->
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="rounded mb-1" style="height:14px; width:160px; background:var(--w-fill);"></div>
+              <div class="rounded" style="height:11px; width:90px; background:var(--w-fill);"></div>
+            </div>
+            <div class="rounded" style="height:30px; width:80px; background:var(--w-fill);"></div>
+          </div>
+          <!-- Tabs skeleton -->
+          <div class="flex gap-0 mb-4" style="border-bottom:1px solid var(--w-border);">
+            <div class="rounded mx-2 my-2" style="height:12px; width:30px; background:var(--w-fill);"></div>
+            <div class="rounded mx-2 my-2" style="height:12px; width:50px; background:var(--w-fill);"></div>
+            <div class="rounded mx-2 my-2" style="height:12px; width:40px; background:var(--w-fill);"></div>
+          </div>
+          <!-- Card skeletons -->
+          <div class="space-y-3">
+            <div class="border rounded-lg p-4 space-y-2" style="border-color:var(--w-border);">
+              <div class="flex gap-2">
+                <div class="rounded-full" style="height:18px; width:55px; background:var(--w-fill);"></div>
+                <div class="rounded-full" style="height:18px; width:65px; background:var(--w-fill);"></div>
+              </div>
+              <div class="rounded" style="height:13px; width:85%; background:var(--w-fill);"></div>
+              <div class="rounded" style="height:13px; width:60%; background:var(--w-fill);"></div>
+              <div class="rounded" style="height:11px; width:40%; background:var(--w-fill);"></div>
+            </div>
+            <div class="border rounded-lg p-4 space-y-2" style="border-color:var(--w-border);">
+              <div class="flex gap-2">
+                <div class="rounded-full" style="height:18px; width:40px; background:var(--w-fill);"></div>
+                <div class="rounded-full" style="height:18px; width:65px; background:var(--w-fill);"></div>
+              </div>
+              <div class="rounded" style="height:13px; width:90%; background:var(--w-fill);"></div>
+              <div class="rounded" style="height:13px; width:55%; background:var(--w-fill);"></div>
+              <div class="rounded" style="height:11px; width:35%; background:var(--w-fill);"></div>
+            </div>
+          </div>
+          <div class="flex items-center justify-center gap-2 mt-4">
+            <i data-lucide="loader" style="width:16px;height:16px;color:var(--w-muted);"></i>
+            <span class="text-xs" style="color:var(--w-muted)">피드를 불러오는 중...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-B: 소스 추가 오류 상태들 (RSSDASH-002, 003, 004, 015) -->
+      <div class="space-y-4">
+        <p class="text-xs font-bold mb-1" style="color:var(--w-muted)">RSSDASH-002 — 소스 추가 성공</p>
+        <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+          <div class="flex gap-2 mb-2">
+            <div class="flex-1 flex items-center border rounded px-3 py-1.5 gap-2" style="border-color:var(--w-border); background:var(--w-fill);">
+              <i data-lucide="rss" style="width:13px;height:13px;flex-shrink:0;"></i>
+              <input class="w-full text-xs border-0 outline-none" style="background:transparent;" value="https://feeds.financialjuice.com/rss" disabled>
+            </div>
+            <button class="border rounded px-2 py-1 text-xs font-bold" style="border-color:var(--w-text); background:var(--w-fill)" disabled>+ 추가</button>
+          </div>
+          <div class="flex gap-0" style="border-bottom:1px solid var(--w-border);">
+            <button class="px-3 py-1.5 text-xs font-bold" style="border-bottom:2px solid var(--w-text);" disabled>All</button>
+            <button class="px-3 py-1.5 text-xs" style="color:var(--w-muted);" disabled>Reuters</button>
+            <button class="px-3 py-1.5 text-xs" style="color:var(--w-muted);" disabled>CNBC</button>
+            <button class="px-3 py-1.5 text-xs font-bold" style="color:var(--w-text); border-bottom:1px solid var(--w-text);" disabled>FinancialJuice ✓</button>
+          </div>
+        </div>
+
+        <p class="text-xs font-bold mb-1" style="color:var(--w-muted)">RSSDASH-003 — 빈 URL 오류</p>
+        <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+          <div class="flex gap-2 mb-2">
+            <div class="flex-1 flex items-center border rounded px-3 py-1.5 gap-2" style="border-color:#e57373; background:var(--w-fill);">
+              <i data-lucide="rss" style="width:13px;height:13px;flex-shrink:0;"></i>
+              <input class="w-full text-xs border-0 outline-none" style="background:transparent; color:var(--w-muted)" placeholder="" disabled>
+            </div>
+            <button class="border rounded px-2 py-1 text-xs font-bold" style="border-color:var(--w-text); background:var(--w-fill)" disabled>+ 추가</button>
+          </div>
+          <p class="text-xs flex items-center gap-1" style="color:#e57373;">
+            <i data-lucide="alert-triangle" style="width:12px;height:12px;"></i>
+            URL을 입력해주세요
+          </p>
+        </div>
+
+        <p class="text-xs font-bold mb-1" style="color:var(--w-muted)">RSSDASH-015 — 형식 오류 / RSSDASH-004 — 중복 오류</p>
+        <div class="grid gap-3" style="grid-template-columns:1fr 1fr;">
+          <div class="border rounded-lg p-3" style="border-color:var(--w-border); background:white;">
+            <div class="flex gap-1 mb-2">
+              <div class="flex-1 flex items-center border rounded px-2 py-1 gap-1" style="border-color:#e57373; background:var(--w-fill);">
+                <input class="w-full text-xs border-0 outline-none" style="background:transparent;" value="not-a-url" disabled>
+              </div>
+            </div>
+            <p class="text-xs flex items-center gap-1" style="color:#e57373;">
+              <i data-lucide="alert-triangle" style="width:11px;height:11px;"></i>
+              올바른 URL 형식이 아닙니다
+            </p>
+          </div>
+          <div class="border rounded-lg p-3" style="border-color:var(--w-border); background:white;">
+            <div class="flex gap-1 mb-2">
+              <div class="flex-1 flex items-center border rounded px-2 py-1 gap-1" style="border-color:#e57373; background:var(--w-fill);">
+                <input class="w-full text-xs border-0 outline-none" style="background:transparent;" value="feeds.reuters.com/..." disabled>
+              </div>
+            </div>
+            <p class="text-xs flex items-center gap-1" style="color:#e57373;">
+              <i data-lucide="alert-triangle" style="width:11px;height:11px;"></i>
+              이미 등록된 소스입니다
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>초기 피드 로딩 상태(스켈레톤 + 스피너)와 소스 추가 오류 4가지 케이스.</p>
+        <ul>
+          <li>RSSDASH-014: 카드 영역에 스켈레톤 플레이스홀더 표시. 로딩 완료 시 기본 화면으로 전환</li>
+          <li>RSSDASH-002: URL 입력 후 추가 성공 → 탭에 "FinancialJuice" 즉시 추가</li>
+          <li>RSSDASH-003: 빈 입력 → 입력 필드 테두리 빨간색 + 오류 메시지</li>
+          <li>RSSDASH-015: URL 형식 아님 / RSSDASH-004: 중복 URL → 동일한 오류 UI 패턴</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 탭 필터 & 검색 -->
+<div id="screen-2" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">③ 탭 필터 & 검색 — RSSDASH-001, 005, 006, 007</h2>
+
+    <div class="grid gap-6 @md:grid-cols-2">
+
+      <!-- 3-A: Reuters 탭 필터 (RSSDASH-005) -->
+      <div>
+        <p class="text-xs font-bold mb-3" style="color:var(--w-muted)">RSSDASH-005 — Reuters 탭 선택 필터</p>
+        <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+          <div class="flex gap-0 mb-4" style="border-bottom:1px solid var(--w-border);">
+            <button class="px-3 py-2 text-xs" style="color:var(--w-muted);" disabled>All</button>
+            <button class="px-3 py-2 text-xs font-bold" style="border-bottom:2px solid var(--w-text);" disabled>Reuters</button>
+            <button class="px-3 py-2 text-xs" style="color:var(--w-muted);" disabled>CNBC</button>
+            <button class="px-3 py-2 text-xs" style="color:var(--w-muted);" disabled>북마크</button>
+          </div>
+          <div class="space-y-2">
+            <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🟢 Bullish</span>
+              </div>
+              <p class="text-xs font-bold leading-snug">Fed Signals Potential Rate Cuts in Q2...</p>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">2시간 전</p>
+            </div>
+            <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">⚪ Neutral</span>
+              </div>
+              <p class="text-xs font-bold leading-snug">EU Reaches Tentative Agreement on AI Regulation...</p>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">4시간 전</p>
+            </div>
+            <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🔴 Bearish</span>
+              </div>
+              <p class="text-xs font-bold leading-snug">Oil Prices Slide 3% on Unexpected Build...</p>
+              <p class="text-xs mt-0.5" style="color:var(--w-muted)">6시간 전</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3-B: 검색 결과 있음 / 없음 (RSSDASH-006, 007) -->
+      <div class="space-y-4">
+        <p class="text-xs font-bold mb-1" style="color:var(--w-muted)">RSSDASH-006 — 키워드 검색 "Fed" 결과</p>
+        <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+          <div class="flex items-center border rounded px-3 py-1.5 gap-2 mb-3" style="border-color:var(--w-text); background:var(--w-fill);">
+            <i data-lucide="search" style="width:14px;height:14px;flex-shrink:0;"></i>
+            <input class="w-full text-sm border-0 outline-none" style="background:transparent;" value="Fed" disabled>
+          </div>
+          <p class="text-xs mb-2" style="color:var(--w-muted)">"Fed" 검색 결과 2건</p>
+          <div class="space-y-2">
+            <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+              <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+              <p class="text-xs font-bold leading-snug mt-1"><span style="background:var(--w-fill); font-weight:900;">Fed</span> Signals Potential Rate Cuts in Q2...</p>
+            </div>
+            <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+              <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">CNBC</span>
+              <p class="text-xs font-bold leading-snug mt-1">Treasury Yields Edge Higher Ahead of <span style="background:var(--w-fill); font-weight:900;">Fed</span> Data...</p>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs font-bold mb-1" style="color:var(--w-muted)">RSSDASH-007 — 검색 결과 없음</p>
+        <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+          <div class="flex items-center border rounded px-3 py-1.5 gap-2 mb-3" style="border-color:var(--w-text); background:var(--w-fill);">
+            <i data-lucide="search" style="width:14px;height:14px;flex-shrink:0;"></i>
+            <input class="w-full text-sm border-0 outline-none" style="background:transparent;" value="zzzznotfound" disabled>
+          </div>
+          <div class="border-2 border-dashed rounded flex flex-col items-center justify-center p-6 gap-2" style="border-color:var(--w-border); color:var(--w-muted)">
+            <i data-lucide="search-x" style="width:28px;height:28px;"></i>
+            <p class="text-sm">검색 결과가 없습니다</p>
+            <p class="text-xs">"zzzznotfound" 에 해당하는 기사가 없습니다</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>소스 탭 필터와 키워드 검색의 두 가지 화면 상태.</p>
+        <ul>
+          <li>RSSDASH-005: Reuters 탭 클릭 시 Reuters 기사만 표시. All 탭으로 돌아오면 전체 복원</li>
+          <li>RSSDASH-006: 검색창에 "Fed" 입력 → 제목에 포함된 기사만 필터, 매칭 텍스트 강조</li>
+          <li>RSSDASH-007: 매칭 없으면 dashed 빈 상태 + 검색어 명시 안내문</li>
+          <li>탭 필터와 검색은 AND 조건 — 특정 탭에서 검색하면 해당 소스 내에서만 검색</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 북마크 & 메모 -->
+<div id="screen-3" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">④ 북마크 & 메모 — RSSDASH-008, 009, 010</h2>
+
+    <div class="grid gap-6 @md:grid-cols-2">
+
+      <!-- 4-A: 북마크 아이콘 상태 (RSSDASH-008) -->
+      <div>
+        <p class="text-xs font-bold mb-3" style="color:var(--w-muted)">RSSDASH-008 — 북마크 아이콘 상태 비교</p>
+        <div class="space-y-3">
+          <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs" style="color:var(--w-muted)">북마크 전 (☆ 비어있음)</span>
+            </div>
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-bold leading-snug flex-1">Fed Signals Potential Rate Cuts in Q2...</p>
+              <div class="flex gap-1 flex-shrink-0">
+                <button class="border rounded p-1.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+                  <i data-lucide="bookmark" style="width:14px;height:14px;"></i>
+                </button>
+                <button class="border rounded p-1.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+                  <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs" style="color:var(--w-muted)">북마크 후 (★ 채워짐)</span>
+            </div>
+            <div class="flex items-start justify-between gap-2">
+              <p class="text-sm font-bold leading-snug flex-1">Fed Signals Potential Rate Cuts in Q2...</p>
+              <div class="flex gap-1 flex-shrink-0">
+                <button class="border rounded p-1.5" style="border-color:var(--w-text); background:var(--w-fill)" disabled>
+                  <i data-lucide="bookmark-check" style="width:14px;height:14px;"></i>
+                </button>
+                <button class="border rounded p-1.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+                  <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4-B: 북마크 탭 (RSSDASH-010) -->
+          <p class="text-xs font-bold mt-4 mb-1" style="color:var(--w-muted)">RSSDASH-010 — 북마크 탭 (2개 북마크)</p>
+          <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+            <div class="flex gap-0 mb-3" style="border-bottom:1px solid var(--w-border);">
+              <button class="px-3 py-2 text-xs" style="color:var(--w-muted);" disabled>All</button>
+              <button class="px-3 py-2 text-xs" style="color:var(--w-muted);" disabled>Reuters</button>
+              <button class="px-3 py-2 text-xs" style="color:var(--w-muted);" disabled>CNBC</button>
+              <button class="px-3 py-2 text-xs font-bold" style="border-bottom:2px solid var(--w-text);" disabled>
+                <i data-lucide="bookmark-check" style="width:12px;height:12px;display:inline;"></i> 북마크 (2)
+              </button>
+            </div>
+            <div class="space-y-2">
+              <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+                <div class="flex gap-2 mb-1">
+                  <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+                  <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🟢 Bullish</span>
+                </div>
+                <p class="text-xs font-bold">Fed Signals Potential Rate Cuts in Q2...</p>
+                <p class="text-xs mt-1 italic" style="color:var(--w-muted)">메모: 연준 피봇 확인 필요</p>
+              </div>
+              <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+                <div class="flex gap-2 mb-1">
+                  <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">CNBC</span>
+                  <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🟢 Bullish</span>
+                </div>
+                <p class="text-xs font-bold">Apple Revenue Beats Estimates: Services...</p>
+                <p class="text-xs mt-1 italic" style="color:var(--w-muted)">메모: AAPL 실적 발표 주목</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4-C: 메모 다이얼로그 (RSSDASH-009) -->
+      <div>
+        <p class="text-xs font-bold mb-3" style="color:var(--w-muted)">RSSDASH-009 — 메모 입력 다이얼로그</p>
+        <div class="rounded-lg" style="position:relative; min-height:340px; background:rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center;">
+          <!-- Background (blurred feed) -->
+          <div style="position:absolute; inset:0; border-radius:8px; overflow:hidden; opacity:0.3;">
+            <div class="border rounded-lg p-3 m-3" style="border-color:var(--w-border); background:white;">
+              <p class="text-xs font-bold">Apple Revenue Beats Estimates: Services Revenue Hits Record $26B</p>
+            </div>
+          </div>
+          <!-- Dialog -->
+          <div class="border rounded-lg w-full" style="border-color:var(--w-border); background:white; max-width:360px; position:relative; z-index:1; margin:16px;">
+            <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--w-border);">
+              <span class="text-sm font-bold">투자 메모</span>
+              <span style="color:var(--w-muted)">✕</span>
+            </div>
+            <div class="p-4">
+              <p class="text-xs mb-3 leading-snug" style="color:var(--w-muted)">Apple Revenue Beats Estimates: Services Revenue Hits Record $26B</p>
+              <label class="text-xs" style="color:var(--w-muted)">메모</label>
+              <textarea class="w-full border rounded px-3 py-2 text-sm mt-1" rows="3" style="border-color:var(--w-border); background:var(--w-fill); resize:none;" disabled>AAPL 실적 발표 주목</textarea>
+            </div>
+            <div class="flex justify-end gap-2 px-4 py-3" style="border-top:1px solid var(--w-border);">
+              <button class="border rounded px-3 py-1 text-sm" style="border-color:var(--w-border); background:var(--w-fill)" disabled>취소</button>
+              <button class="border rounded px-3 py-1 text-sm font-bold" style="border-color:var(--w-text); background:var(--w-fill)" disabled>저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>북마크 토글, 투자 메모 다이얼로그, 북마크 탭 모아보기 세 가지 상태.</p>
+        <ul>
+          <li>RSSDASH-008: 북마크 아이콘 클릭 → 아이콘이 bookmark → bookmark-check로 전환 (localStorage 저장)</li>
+          <li>RSSDASH-009: 메모(연필) 아이콘 클릭 → 다이얼로그 열림. 텍스트 입력 후 저장 → 카드에 이탤릭 메모 미리보기</li>
+          <li>RSSDASH-010: 북마크 탭 클릭 → 북마크된 기사만 표시 + 각 카드에 메모가 있으면 이탤릭으로 표시</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 새로고침 & Reddit 오류 -->
+<div id="screen-4" class="screen">
+  <div class="screen-content @container max-w-6xl mx-auto p-6">
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">⑤ 새로고침 & Reddit 오류 — RSSDASH-011, 012, 013, 016</h2>
+
+    <div class="grid gap-6 @md:grid-cols-2">
+
+      <!-- 5-A: 새로고침 로딩 (RSSDASH-011) -->
+      <div>
+        <p class="text-xs font-bold mb-3" style="color:var(--w-muted)">RSSDASH-011 — 수동 새로고침</p>
+        <div class="space-y-3">
+          <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+            <p class="text-xs mb-2" style="color:var(--w-muted)">새로고침 클릭 중 (로딩 스피너)</p>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-bold">투자 리서치 대시보드</p>
+                <p class="text-xs" style="color:var(--w-muted)">업데이트 중...</p>
+              </div>
+              <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+                <i data-lucide="loader" style="width:14px;height:14px;"></i>
+                새로고침
+              </button>
+            </div>
+          </div>
+          <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+            <p class="text-xs mb-2" style="color:var(--w-muted)">새로고침 완료</p>
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-bold">투자 리서치 대시보드</p>
+                <p class="text-xs" style="color:var(--w-muted)">방금 전 업데이트</p>
+              </div>
+              <button class="border rounded px-3 py-1.5 text-sm flex items-center gap-1.5" style="border-color:var(--w-border); background:var(--w-fill)" disabled>
+                <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i>
+                새로고침
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-B: Reddit 정상 상태 요약 (RSSDASH-012, 013) -->
+        <p class="text-xs font-bold mt-4 mb-2" style="color:var(--w-muted)">RSSDASH-012, 013 — Reddit 정상 상태</p>
+        <div class="border rounded-lg p-4" style="border-color:var(--w-border); background:white;">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="message-circle" style="width:14px;height:14px;"></i>
+            <span class="text-xs font-bold">Reddit 커뮤니티 반응</span>
+          </div>
+          <div class="grid gap-2" style="grid-template-columns:1fr 1fr;">
+            <div>
+              <p class="text-xs font-bold mb-1" style="color:var(--w-muted)">WSB Top</p>
+              <div class="text-xs space-y-1">
+                <div class="flex justify-between"><span class="font-bold">1. AAPL</span><span style="color:var(--w-muted)">342회</span></div>
+                <div class="flex justify-between"><span class="font-bold">2. TSLA</span><span style="color:var(--w-muted)">298회</span></div>
+                <div class="flex justify-between"><span class="font-bold">3. NVDA</span><span style="color:var(--w-muted)">241회</span></div>
+              </div>
+            </div>
+            <div>
+              <p class="text-xs font-bold mb-1" style="color:var(--w-muted)">r/investing</p>
+              <div class="text-xs space-y-1">
+                <p class="leading-tight" style="color:var(--w-muted)">Fed cuts — rotate to value?</p>
+                <p class="leading-tight" style="color:var(--w-muted)">Daily Discussion 3/19</p>
+                <p class="leading-tight" style="color:var(--w-muted)">Oil inventory implications...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5-C: Reddit API 오류 (RSSDASH-016) -->
+      <div>
+        <p class="text-xs font-bold mb-3" style="color:var(--w-muted)">RSSDASH-016 — Reddit 섹션 API 오류</p>
+        <div class="border rounded-lg overflow-hidden" style="border-color:var(--w-border); background:white;">
+          <!-- 뉴스 피드는 정상 -->
+          <div class="p-4" style="border-bottom:1px solid var(--w-border);">
+            <p class="text-xs font-bold mb-2" style="color:var(--w-muted)">뉴스 피드 (정상)</p>
+            <div class="border rounded-lg p-3" style="border-color:var(--w-border);">
+              <div class="flex gap-2 mb-1">
+                <span class="border rounded-full px-2 text-xs" style="border-color:var(--w-border); background:var(--w-fill)">Reuters</span>
+                <span class="border rounded-full px-2 text-xs font-bold" style="border-color:var(--w-border); background:var(--w-fill)">🟢 Bullish</span>
+              </div>
+              <p class="text-xs font-bold">Fed Signals Potential Rate Cuts in Q2...</p>
+            </div>
+          </div>
+          <!-- Reddit 오류 상태 -->
+          <div class="p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="message-circle" style="width:14px;height:14px;"></i>
+              <span class="text-xs font-bold">Reddit 커뮤니티 반응</span>
+            </div>
+            <div class="border rounded-lg px-4 py-5 flex flex-col items-center gap-3 text-center" style="border-color:var(--w-border); background:var(--w-fill);">
+              <i data-lucide="wifi-off" style="width:28px;height:28px;color:var(--w-muted);"></i>
+              <div>
+                <p class="text-sm font-bold">Reddit 데이터를 불러올 수 없습니다</p>
+                <p class="text-xs mt-1" style="color:var(--w-muted)">ApeWisdom / Reddit API 연결 실패</p>
+              </div>
+              <button class="border rounded px-4 py-1.5 text-sm flex items-center gap-1.5" style="border-color:var(--w-border); background:white;" disabled>
+                <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i>
+                재시도
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen-notes mt-6">
+      <details open>
+        <summary>Notes</summary>
+        <p>새로고침 상태 전환과 Reddit API 오류 처리 화면.</p>
+        <ul>
+          <li>RSSDASH-011: 새로고침 버튼 클릭 → loader 아이콘 + "업데이트 중..." 표시. 완료 시 "방금 전 업데이트"로 복귀</li>
+          <li>RSSDASH-012/013: 정상 상태의 Reddit 섹션 요약 (WSB Top 3 + r/investing 최신글 3개)</li>
+          <li>RSSDASH-016: Reddit API 실패 시 뉴스 피드는 유지, Reddit 섹션만 오류 UI(wifi-off 아이콘 + 오류 메시지 + 재시도 버튼)로 교체</li>
+          <li>재시도 버튼 클릭 시 Reddit 섹션만 로딩 다시 시도 (전체 피드 새로고침 아님)</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight' && currentScreen < screenIds.length - 1) show(screenIds[currentScreen + 1]);
+  else if (e.key === 'ArrowLeft' && currentScreen > 0) show(screenIds[currentScreen - 1]);
+});
+</script>
+<script>
+(function() {
+  var root = document.createElement('div');
+  root.id = 'wf-feedback-root';
+  document.body.appendChild(root);
+  var shadow = root.attachShadow({ mode: 'open' });
+  shadow.innerHTML = '<style>:host{all:initial;}.wf-toggle{position:fixed;bottom:20px;right:20px;z-index:99999;width:44px;height:44px;border-radius:12px;border:1px solid hsl(214.3 31.8% 91.4%);background:hsl(0 0% 100%);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:sans-serif;color:hsl(215.4 16.3% 46.9%);box-shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);transition:all .15s ease;}.wf-toggle:hover{background:hsl(210 40% 96.1%);color:hsl(222.2 47.4% 11.2%);}.wf-toggle.active{background:hsl(222.2 47.4% 11.2%);color:hsl(210 40% 98%);border-color:hsl(222.2 47.4% 11.2%);}.wf-highlight{position:absolute;background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.5);pointer-events:none;z-index:99990;border-radius:2px;transition:all .1s;}.wf-toast{position:fixed;bottom:72px;right:20px;z-index:99999;background:hsl(222.2 47.4% 11.2%);color:#fff;font-family:sans-serif;font-size:13px;padding:8px 16px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);opacity:0;transition:opacity .2s ease;pointer-events:none;max-width:320px;word-break:break-all;}.wf-toast.visible{opacity:1;}</style><div class="wf-toggle" id="wf-toggle-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.855z"/></svg></div><div class="wf-highlight" id="wf-highlight" style="display:none"></div><div class="wf-toast" id="wf-toast"></div>';
+  var toggleBtn=shadow.getElementById('wf-toggle-btn'),highlightEl=shadow.getElementById('wf-highlight'),toastEl=shadow.getElementById('wf-toast'),feedbackMode=false,toastTimer;
+  function showToast(t){toastEl.textContent=t;toastEl.classList.add('visible');clearTimeout(toastTimer);toastTimer=window.setTimeout(function(){toastEl.classList.remove('visible');},2000);}
+  function copyToClipboard(t){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){showToast('Copied: '+t);},function(){fallbackCopy(t);});}else{fallbackCopy(t);}}
+  function fallbackCopy(t){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('Copied: '+t);}catch(_){showToast('Copy failed');}document.body.removeChild(ta);}
+  toggleBtn.addEventListener('click',function(){feedbackMode=!feedbackMode;toggleBtn.classList.toggle('active',feedbackMode);if(!feedbackMode)highlightEl.style.display='none';});
+  function buildSelector(el){var parts=[],cur=el;while(cur&&cur!==document.body&&cur!==document.documentElement){if(cur.id){parts.unshift('#'+cur.id);break;}var tag=cur.tagName,parent=cur.parentElement;if(parent){var siblings=Array.from(parent.children),idx=siblings.indexOf(cur)+1;parts.unshift(tag+':nth-child('+idx+')');}else{parts.unshift(tag);}cur=parent;}return parts.join(' > ');}
+  function getScreenId(){var active=document.querySelector('.screen.active');return active?active.id.replace('screen-',''):'unknown';}
+  document.addEventListener('mousemove',function(e){if(!feedbackMode)return;var target=e.target;if(!target||target.closest('#wf-feedback-root')||target.closest('nav')){highlightEl.style.display='none';return;}var screen=target.closest('.screen.active');if(!screen){highlightEl.style.display='none';return;}var rect=target.getBoundingClientRect();highlightEl.style.display='block';highlightEl.style.top=(rect.top+window.scrollY)+'px';highlightEl.style.left=(rect.left+window.scrollX)+'px';highlightEl.style.width=rect.width+'px';highlightEl.style.height=rect.height+'px';});
+  document.addEventListener('click',function(e){if(!feedbackMode)return;var target=e.target;if(!target||target.closest('#wf-feedback-root'))return;if(target.closest('nav'))return;var screen=target.closest('.screen.active');if(!screen)return;e.preventDefault();e.stopPropagation();var selector=buildSelector(target);var path='[screen-'+getScreenId()+' > '+selector+']';copyToClipboard(path);},true);
+})();
+</script>
+</body>
+</html>

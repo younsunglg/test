@@ -1,0 +1,184 @@
+version: 1
+
+scenarios:
+  - id: "RSSDASH-001"
+    name: "앱 최초 진입 — 기본 소스 피드 표시"
+    given: "앱에 처음 진입한 상태 (Reuters, CNBC 기본 등록)"
+    when: "페이지가 로드된다"
+    then: "All·Reuters·CNBC 탭과 두 소스 기사 목록이 발행 시각 내림차순으로 표시된다"
+    examples:
+      - input: { activeTab: "All" }
+        expect:
+          tabs: ["All", "Reuters", "CNBC"]
+          firstCardSource: "Reuters"
+          sentimentBadgeVisible: true
+      - input: { activeTab: "Reuters" }
+        expect:
+          visibleSources: ["Reuters"]
+
+  - id: "RSSDASH-014"
+    name: "앱 최초 진입 — 피드 로딩 중 상태"
+    given: "앱에 처음 진입했고 RSS API 응답이 아직 도착하지 않은 상태"
+    when: "페이지가 피드를 불러오는 중이다"
+    then: "기사 목록 영역에 로딩 스피너가 표시되고 기사 카드는 없다"
+    examples:
+      - input: { feedLoading: true }
+        expect:
+          loadingSpinnerVisible: true
+          articleCardCount: 0
+
+  - id: "RSSDASH-002"
+    name: "RSS 소스 추가 — 유효한 URL"
+    given: "소스 목록에 Reuters, CNBC만 등록된 상태"
+    when: "소스 추가 입력란에 'https://feeds.financialjuice.com/rss' 를 입력하고 추가 버튼을 클릭한다"
+    then: "FinancialJuice 탭이 생기고 해당 소스 기사가 All 탭에 추가된다"
+    examples:
+      - input: { url: "https://feeds.financialjuice.com/rss" }
+        expect:
+          tabs: ["All", "Reuters", "CNBC", "FinancialJuice"]
+          newTabVisible: true
+
+  - id: "RSSDASH-003"
+    name: "RSS 소스 추가 — 빈 URL 오류"
+    given: "소스 추가 입력란이 비어 있는 상태"
+    when: "추가 버튼을 클릭한다"
+    then: "'URL을 입력해주세요' 오류 메시지가 표시된다"
+    examples:
+      - input: { url: "" }
+        expect:
+          errorMessage: "URL을 입력해주세요"
+
+  - id: "RSSDASH-015"
+    name: "RSS 소스 추가 — 유효하지 않은 URL 형식 오류"
+    given: "소스 추가 입력란에 URL 형식이 아닌 텍스트가 입력된 상태"
+    when: "추가 버튼을 클릭한다"
+    then: "'올바른 URL 형식이 아닙니다' 오류 메시지가 표시된다"
+    examples:
+      - input: { url: "not-a-url" }
+        expect:
+          errorMessage: "올바른 URL 형식이 아닙니다"
+      - input: { url: "financialjuice" }
+        expect:
+          errorMessage: "올바른 URL 형식이 아닙니다"
+
+  - id: "RSSDASH-004"
+    name: "RSS 소스 추가 — 중복 URL 오류"
+    given: "Reuters RSS URL이 이미 등록된 상태"
+    when: "동일한 Reuters RSS URL을 다시 입력하고 추가 버튼을 클릭한다"
+    then: "'이미 등록된 소스입니다' 오류 메시지가 표시된다"
+    examples:
+      - input: { url: "https://feeds.reuters.com/reuters/businessNews" }
+        expect:
+          errorMessage: "이미 등록된 소스입니다"
+
+  - id: "RSSDASH-005"
+    name: "소스별 탭 필터"
+    given: "All·Reuters·CNBC 탭이 있고 두 소스 기사가 All 탭에 표시된 상태"
+    when: "'Reuters' 탭을 클릭한다"
+    then: "Reuters 기사만 표시되고 모든 카드의 소스명이 Reuters이다"
+    examples:
+      - input: { tab: "Reuters" }
+        expect:
+          visibleSources: ["Reuters"]
+      - input: { tab: "All" }
+        expect:
+          visibleSources: ["Reuters", "CNBC"]
+
+  - id: "RSSDASH-006"
+    name: "키워드 검색 — 결과 있음"
+    given: "여러 소스 기사가 표시된 뉴스 피드"
+    when: "검색창에 'Fed'를 입력한다"
+    then: "제목에 'Fed'가 포함된 기사만 표시된다"
+    examples:
+      - input: { keyword: "Fed" }
+        expect:
+          allCardsTitleContain: "Fed"
+      - input: { keyword: "" }
+        expect:
+          showsAllArticles: true
+
+  - id: "RSSDASH-007"
+    name: "키워드 검색 — 결과 없음"
+    given: "여러 소스 기사가 표시된 뉴스 피드"
+    when: "검색창에 'zzzznotfound'를 입력한다"
+    then: "'검색 결과가 없습니다' 문구가 표시된다"
+    examples:
+      - input: { keyword: "zzzznotfound" }
+        expect:
+          emptyMessage: "검색 결과가 없습니다"
+
+  - id: "RSSDASH-008"
+    name: "기사 북마크"
+    given: "기사 카드가 북마크되지 않은 상태"
+    when: "기사 카드의 북마크 아이콘을 클릭한다"
+    then: "아이콘이 채워진 상태(★)로 바뀌고 새로고침 후에도 유지된다"
+    examples:
+      - input: { action: "bookmark", articleId: "article-001" }
+        expect:
+          bookmarkIcon: "filled"
+          persistsAfterReload: true
+
+  - id: "RSSDASH-009"
+    name: "기사 메모 추가"
+    given: "기사 카드가 표시된 상태"
+    when: "메모 아이콘을 클릭하고 'AAPL 실적 발표 주목'을 입력한 후 저장한다"
+    then: "카드에 메모 미리보기 텍스트가 표시된다"
+    examples:
+      - input: { memo: "AAPL 실적 발표 주목", articleId: "article-001" }
+        expect:
+          memoPreview: "AAPL 실적 발표 주목"
+
+  - id: "RSSDASH-010"
+    name: "북마크 탭 모아보기"
+    given: "기사 2개가 북마크된 상태"
+    when: "'북마크' 탭을 클릭한다"
+    then: "북마크된 기사 2개만 표시된다"
+    examples:
+      - input: { tab: "북마크", bookmarkedCount: 2 }
+        expect:
+          cardCount: 2
+
+  - id: "RSSDASH-011"
+    name: "수동 새로고침"
+    given: "뉴스 피드가 표시된 상태"
+    when: "새로고침 버튼을 클릭한다"
+    then: "로딩 스피너가 표시되다가 완료 후 '방금 전 업데이트' 텍스트가 나타난다"
+    examples:
+      - input: { action: "refresh" }
+        expect:
+          loadingSpinnerVisible: true
+      - input: { action: "refreshComplete" }
+        expect:
+          lastUpdatedText: "방금 전 업데이트"
+
+  - id: "RSSDASH-012"
+    name: "Reddit WSB Top 종목 표시"
+    given: "대시보드 하단 Reddit 섹션이 로드된 상태"
+    when: "ApeWisdom API 응답이 도착한다"
+    then: "WSB Top 종목 순위(순위·티커·언급 수)가 표시된다"
+    examples:
+      - input: { wsbTop: [{ rank: 1, ticker: "AAPL", mentions: 342 }] }
+        expect:
+          firstItem: "1. AAPL 342회"
+
+  - id: "RSSDASH-016"
+    name: "Reddit 섹션 — API 오류 상태"
+    given: "대시보드 하단 Reddit 섹션이 로드 중인 상태"
+    when: "ApeWisdom 또는 Reddit API 요청이 실패한다"
+    then: "'Reddit 데이터를 불러올 수 없습니다' 오류 문구와 재시도 버튼이 표시된다"
+    examples:
+      - input: { apiStatus: "error" }
+        expect:
+          errorMessage: "Reddit 데이터를 불러올 수 없습니다"
+          retryButtonVisible: true
+
+  - id: "RSSDASH-013"
+    name: "r/investing 최신 게시글 표시"
+    given: "대시보드 하단 Reddit 섹션이 로드된 상태"
+    when: "Reddit JSON API 응답이 도착한다"
+    then: "r/investing 최신 게시글 제목이 3개 이상 표시된다"
+    examples:
+      - input: { posts: ["Post A", "Post B", "Post C"] }
+        expect:
+          visiblePostCount: 3
+          eachPostHasLink: true
