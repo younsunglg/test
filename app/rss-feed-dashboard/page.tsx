@@ -42,7 +42,7 @@ export default function RssFeedDashboardPage() {
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
 
   // SWR: news feed (client-swr-dedup rule)
-  const newsKey = `/api/rss?sources=${sources.map((s) => s.id).join(",")}`;
+  const newsKey = `/api/rss?sources=${sources.map((s) => `${s.id}:${encodeURIComponent(s.name)}:${encodeURIComponent(s.url)}`).join(",")}`;
   const { data: newsItems, isLoading, mutate: refreshNews } = useSWR<NewsItem[]>(
     newsKey,
     fetcher,
@@ -61,7 +61,7 @@ export default function RssFeedDashboardPage() {
   }, [newsItems]);
 
   // --- Derived filtering (rerender-derived-state rule) ---
-  const allItems = newsItems ?? [];
+  const allItems = Array.isArray(newsItems) ? newsItems : [];
 
   const tabFiltered =
     activeTab === "All"
@@ -77,9 +77,9 @@ export default function RssFeedDashboardPage() {
     : tabFiltered;
 
   // Sort by publishedAt descending (js-tosorted-immutable rule)
-  const sortedItems = filteredItems.toSorted(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
-  );
+  const sortedItems = filteredItems
+    .slice()
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
   const handleRefresh = () => {
     refreshNews();
